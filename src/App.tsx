@@ -10,11 +10,11 @@ function App() {
   const video1Ref: any = useRef(null);
   const video2Ref: any = useRef(null);
 
-  const audio1Ref: any = useRef(null);
-  const audio2Ref: any = useRef(null);
+  // const audio1Ref: any = useRef(null);
+  // const audio2Ref: any = useRef(null);
+  // const textAreaRef: any = useRef(null);
 
   const rtcPeerConnRef = useRef(new RTCPeerConnection());
-  const textAreaRef: any = useRef(null);
   const roomIdRef = useRef("");
   const offererSDPDataRef = useRef({});
   const offererCandidatesRef = useRef([]);
@@ -23,57 +23,57 @@ function App() {
   const [room, setRoom] = useState("");
 
 
-  const createOffer = () => {
+  // const createOffer = () => {
 
-    rtcPeerConnRef.current.createOffer({
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: true
-    }).then((sdp: any) => {
-      console.log(JSON.stringify(sdp));
+  //   rtcPeerConnRef.current.createOffer({
+  //     offerToReceiveAudio: true,
+  //     offerToReceiveVideo: true
+  //   }).then((sdp: any) => {
+  //     console.log(JSON.stringify(sdp));
 
-      // setting local descrition
-      rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(sdp));
+  //     // setting local descrition
+  //     rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(sdp));
 
-    }).catch((err: Error) => {
-      console.log("Error: ", err);
-    });
+  //   }).catch((err: Error) => {
+  //     console.log("Error: ", err);
+  //   });
 
-  }
+  // }
 
-  const createAnswer = () => {
+  // const createAnswer = () => {
 
-    rtcPeerConnRef.current.createAnswer({
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: true
-    }).then((sdp: any) => {
-      console.log(JSON.stringify(sdp));
+  //   rtcPeerConnRef.current.createAnswer({
+  //     offerToReceiveAudio: true,
+  //     offerToReceiveVideo: true
+  //   }).then((sdp: any) => {
+  //     console.log(JSON.stringify(sdp));
 
-      // setting local descrition
-      rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(sdp));
+  //     // setting local descrition
+  //     rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(sdp));
 
-    }).catch((err: Error) => {
-      console.log("Error: ", err);
-    });
+  //   }).catch((err: Error) => {
+  //     console.log("Error: ", err);
+  //   });
 
-  }
+  // }
 
-  const setRemoteDesccription = () => {
+  // const setRemoteDesccription = () => {
 
-    const sdp = JSON.parse(textAreaRef.current.value);
+  //   const sdp = JSON.parse(textAreaRef.current.value);
 
-    console.log("remote sdp = ", sdp);
+  //   console.log("remote sdp = ", sdp);
 
-    rtcPeerConnRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
+  //   rtcPeerConnRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
 
-  }
+  // }
 
-  const addCandidate = () => {
-    const candidate = JSON.parse(textAreaRef.current.value);
+  // const addCandidate = () => {
+  //   const candidate = JSON.parse(textAreaRef.current.value);
 
-    console.log("Adding candidate : ", candidate);
+  //   console.log("Adding candidate : ", candidate);
 
-    rtcPeerConnRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-  }
+  //   rtcPeerConnRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+  // }
 
   const createRoom = async () => {
     try {
@@ -138,7 +138,7 @@ function App() {
       }
     }
 
-    rtcPeerConn.oniceconnectionstatechange = (data) => {
+    rtcPeerConn.oniceconnectionstatechange = (_data) => {
       // console.log("on ice connections state change event listener called : ", data);
     }
 
@@ -154,7 +154,7 @@ function App() {
   // socket handlers
   useEffect(() => {
 
-    socket.on("greeting", ({ message, socketId }) => {
+    socket.on("greeting", ({ message }) => {
       console.log("message from server : ", message);
     });
 
@@ -234,17 +234,17 @@ function App() {
 
       <button onClick={createRoom}>Create Room</button>
 
-      <p>roomid: {roomIdRef.current}</p>
-
-      {/* {
+      {
         isRoomCreated ?
-          <> */}
-      <input type="text" value={room} onChange={(e: any) => setRoom(e.target.value)} />
-      <button onClick={joinRoom} > Join Room </button>
-      {/* </>
+          <>
+            <p>roomid: {roomIdRef.current}</p>
+          </>
           :
           null
-      } */}
+      }
+
+      <input type="text" value={room} onChange={(e: any) => setRoom(e.target.value)} />
+      <button onClick={joinRoom} > Join Room </button>
 
 
     </>
