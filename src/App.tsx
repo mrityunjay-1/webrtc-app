@@ -10,7 +10,7 @@ function App() {
   const video1Ref: any = useRef(null);
   const video2Ref: any = useRef(null);
 
-  // const audio1Ref: any = useRef(null);
+  const audio1Ref: any = useRef(null);
   // const audio2Ref: any = useRef(null);
   // const textAreaRef: any = useRef(null);
 
@@ -112,11 +112,10 @@ function App() {
 
   useEffect(() => {
 
-    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
       .then((stream) => {
 
-        video1Ref.current.srcObject = stream;
-        // audio1Ref.current.srcObject = stream;
+        // video1Ref.current.srcObject = stream;
 
         stream.getTracks().forEach((track) => {
           rtcPeerConnRef.current.addTrack(track, stream);
@@ -143,8 +142,10 @@ function App() {
     }
 
     rtcPeerConn.ontrack = (data) => {
-      // console.log("ontrack event listener called : ", data);
+      console.log("ontrack event listener called : ", data);
       video2Ref.current.srcObject = data.streams[0];
+      audio1Ref.current.srcObject = data.streams[0];
+      // audio1Ref.current.play();
     }
 
     rtcPeerConnRef.current = rtcPeerConn;
@@ -210,7 +211,7 @@ function App() {
     <>
 
       <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video1Ref} autoPlay></video>
-      {/* <audio ref={audio1Ref} autoPlay></audio> */}
+      <audio ref={audio1Ref} autoPlay></audio>
 
       <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video2Ref} autoPlay></video>
       {/* <audio ref={audio2Ref} autoPlay></audio> */}
