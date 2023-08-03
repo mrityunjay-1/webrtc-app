@@ -22,6 +22,7 @@ function App() {
   const [isRoomCreated, setIsRoomCreated] = useState(false);
   const [room, setRoom] = useState("");
 
+  const [offerers, setOfferers] = useState({});
 
   // const createOffer = () => {
 
@@ -100,10 +101,11 @@ function App() {
     }
   }
 
-  const joinRoom = () => {
+  const joinRoom = (roomId: string) => {
     try {
 
-      socket.emit("userWantToJoinRoom", { roomId: room });
+      socket.emit("userWantToJoinRoom", { roomId });
+      roomIdRef.current = roomId;
 
     } catch (err) {
       console.log("Err: ", err);
@@ -112,7 +114,7 @@ function App() {
 
   useEffect(() => {
 
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       .then((stream) => {
 
         // video1Ref.current.srcObject = stream;
@@ -130,20 +132,27 @@ function App() {
 
     rtcPeerConn.onicecandidate = (data) => {
       if (data.candidate) {
-        // console.log("Candidate >>>");
-        // console.log(JSON.stringify(data.candidate));
+        console.log("Candidate >>>");
+        console.log(JSON.stringify(data.candidate));
         if (roomIdRef.current)
           socket.emit("offererIceCandidates", { roomId: roomIdRef.current, candidate: data.candidate });
       }
     }
 
-    rtcPeerConn.oniceconnectionstatechange = (_data) => {
-      // console.log("on ice connections state change event listener called : ", data);
+    rtcPeerConn.oniceconnectionstatechange = (data: any) => {
+      console.log("on ice connections state change event listener called : ", data);
+
+      if (data?.target?.iceConnectionState === "disconnected") {
+        console.log("peer disconnected...");
+        rtcPeerConnRef.current.close();
+        location.reload();
+      }
+
     }
 
     rtcPeerConn.ontrack = (data) => {
       console.log("ontrack event listener called : ", data);
-      video2Ref.current.srcObject = data.streams[0];
+      // video2Ref.current.srcObject = data.streams[0];
       audio1Ref.current.srcObject = data.streams[0];
       // audio1Ref.current.play();
     }
@@ -159,6 +168,11 @@ function App() {
       console.log("message from server : ", message);
     });
 
+    socket.on("liveOfferersList", (offerersList) => {
+      console.log("received offeres list: ", offerersList);
+      setOfferers(offerersList);
+    });
+
     socket.on("userWantToJoinRoomRes", async ({ offererSDPData, candidates }) => {
       try {
         offererSDPDataRef.current = offererSDPData;
@@ -171,13 +185,13 @@ function App() {
         const answererSDPData = await rtcPeerConnRef.current.createAnswer({
           offerToReceiveAudio: true,
           offerToReceiveVideo: true
-        })
+        });
 
         rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(answererSDPData));
         console.log("answers local answer sdp set...");
 
 
-        socket.emit("answererSDPData", { answererSDPData });
+        socket.emit("answererSDPData", { roomId: roomIdRef.current, answererSDPData });
 
       } catch (err) {
         console.log("Error ocurred in userWantToJoinRoomRes : ", err);
@@ -195,10 +209,10 @@ function App() {
     });
 
 
-    socket.on("addIceCandidateOnAnswererSide", () => {
+    socket.on("addIceCandidateOnAnswererSide", ({ iceCandidates }) => {
       console.log("setting ice candidates over answerer side...");
       // setting candidate
-      offererCandidatesRef.current.forEach((candidate) => {
+      iceCandidates.forEach((candidate: any) => {
         rtcPeerConnRef.current.addIceCandidate(new RTCIceCandidate(candidate));
       });
 
@@ -210,10 +224,10 @@ function App() {
   return (
     <>
 
-      <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video1Ref} autoPlay></video>
+      {/* <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video1Ref} autoPlay></video>
       <audio ref={audio1Ref} autoPlay></audio>
 
-      <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video2Ref} autoPlay></video>
+      <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video2Ref} autoPlay></video> */}
       {/* <audio ref={audio2Ref} autoPlay></audio> */}
 
       <br />
@@ -233,7 +247,7 @@ function App() {
       <button onClick={setRemoteDesccription}>set remote description</button>
       <button onClick={addCandidate}>Add candidate</button> */}
 
-      <button onClick={createRoom}>Create Room</button>
+      {/* <button onClick={createRoom}>Create Room</button>
 
       {
         isRoomCreated ?
@@ -245,8 +259,18 @@ function App() {
       }
 
       <input type="text" value={room} onChange={(e: any) => setRoom(e.target.value)} />
-      <button onClick={joinRoom} > Join Room </button>
+      <button onClick={() => joinRoom(room)} > Join Room </button> */}
 
+
+      {
+        Object.keys(offerers).map((roomId) => {
+          return (
+            <>
+              <button onClick={() => joinRoom(roomId)}>{roomId}</button>
+            </>
+          );
+        })
+      }
 
     </>
   )
