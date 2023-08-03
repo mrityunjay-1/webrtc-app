@@ -1,0 +1,33 @@
+.call-container {
+    gap: 2rem;
+    flex-wrap: wrap;
+    /* justify-content: space-between; */
+    background-color: #e6e6e6;
+    display: flex;
+    width: 100%;
+    height: auto;
+    padding: 2rem;
+}
+
+.call-container>div {
+    width: 32%;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.4rem;
+    border: 0.1rem solid lightgrey;
+}
+
+.join-cut-call-button {
+    cursor: pointer;
+    border: none;
+    background-color: green;
+    color: white;
+    padding: 1rem 4rem;
+    border-radius: 0.5rem;
+}
+
+@media(max-width: 58rem) {
+    .call-container>div {
+        width: 100%;
+    }
+}

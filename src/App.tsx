@@ -24,6 +24,8 @@ function App() {
 
   const [offerers, setOfferers] = useState([]);
 
+  const [currentlyHandlingSocketId, setCurrentlyHandlingSocketId] = useState("");
+
   // const createOffer = () => {
 
   //   rtcPeerConnRef.current.createOffer({
@@ -101,14 +103,31 @@ function App() {
   //   }
   // }
 
-  const joinRoom = (roomId: string) => {
+  const joinRoom = (roomId: string, userSocketId: string) => {
     try {
 
       socket.emit("userWantToJoinRoom", { roomId });
+
       roomIdRef.current = roomId;
+
+      setCurrentlyHandlingSocketId(userSocketId);
 
     } catch (err) {
       console.log("Err: ", err);
+    }
+  }
+
+  const leaveRoom = (roomId: string) => {
+    try {
+
+      rtcPeerConnRef.current.close();
+
+      if (roomId) socket.emit("leaveRoomFromAnswererSide", { roomId });
+
+      location.reload();
+
+    } catch (err) {
+      console.log("Error while leaving room: ", err);
     }
   }
 
@@ -144,8 +163,7 @@ function App() {
 
       if (data?.target?.iceConnectionState === "disconnected") {
         console.log("peer disconnected...");
-        rtcPeerConnRef.current.close();
-        location.reload();
+        leaveRoom("");
       }
 
     }
@@ -231,10 +249,6 @@ function App() {
       {/* <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video2Ref} autoPlay></video> */}
       {/* <audio ref={audio2Ref} autoPlay></audio> */}
 
-      <br />
-      <br />
-      <br />
-
       {/* <button onClick={createOffer}>Create Offer</button>
       <button onClick={createAnswer}>Create Answer</button>
 
@@ -262,16 +276,68 @@ function App() {
       <input type="text" value={room} onChange={(e: any) => setRoom(e.target.value)} />
       <button onClick={() => joinRoom(room)} > Join Room </button> */}
 
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "2rem 2rem" }}>
+        <h1 style={{ fontSize: "3rem" }}>Agent Dashboard</h1>
 
-      {
-        offerers.map((offerer: any) => {
-          return (
-            <>
-              <button onClick={() => joinRoom(offerer?.roomId)}>{offerer?.roomId}</button>
-            </>
-          );
-        })
-      }
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <p style={{ fontSize: "2rem", color: "green" }}>Total Calls &nbsp; &nbsp; </p>
+          <div style={{ backgroundColor: "green", borderRadius: "5rem", width: "3rem", height: "3rem", display: "grid", placeItems: "center" }}>
+            <p style={{ textAlign: "center", fontSize: "2rem", color: "white" }}>{offerers?.length}</p>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <h1 style={{ padding: "1rem 2rem", color: "grey" }}> {offerers?.length === 0 ? "No Call Available." : "Available Calls..."} </h1>
+
+      <div className='call-container'>
+        {
+          offerers.map((offerer: any) => {
+            return (
+              <>
+                <div key={offerer?.userSocketId}>
+
+                  <div style={{ marginBottom: "1rem" }}>
+                    <h1>Socket Id</h1>
+                    <p style={{ fontSize: "1.4rem", color: "grey" }}>{offerer?.userSocketId}</p>
+                  </div>
+
+                  <div style={{ marginBottom: "1rem" }}>
+                    <h1>Room Id</h1>
+                    <p style={{ fontSize: "1.4rem", color: "grey" }}>{offerer?.roomId}</p>
+                  </div>
+
+                  {
+                    currentlyHandlingSocketId !== offerer?.userSocketId ?
+
+                      !currentlyHandlingSocketId ?
+                        <button
+                          className='join-cut-call-button'
+                          style={{ background: "green" }}
+                          onClick={() => joinRoom(offerer?.roomId, offerer?.userSocketId)}>
+                          Join This Call
+                        </button>
+                        :
+                        null
+
+                      :
+
+                      <button
+                        className='join-cut-call-button'
+                        style={{ background: "red" }}
+                        onClick={() => leaveRoom(offerer?.roomId)}>
+                        Cut Call
+                      </button>
+                  }
+
+                </div>
+
+              </>
+            );
+          })
+        }
+      </div>
 
     </>
   )
