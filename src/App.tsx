@@ -7,8 +7,8 @@ const socket = io(import.meta.env.VITE_APP_SERVER_URL);
 
 function App() {
 
-  const video1Ref: any = useRef(null);
-  const video2Ref: any = useRef(null);
+  // const video1Ref: any = useRef(null);
+  // const video2Ref: any = useRef(null);
 
   const audio1Ref: any = useRef(null);
   // const audio2Ref: any = useRef(null);
@@ -19,8 +19,8 @@ function App() {
   const offererSDPDataRef = useRef({});
   const offererCandidatesRef = useRef([]);
 
-  const [isRoomCreated, setIsRoomCreated] = useState(false);
-  const [room, setRoom] = useState("");
+  // const [isRoomCreated, setIsRoomCreated] = useState(false);
+  // const [room, setRoom] = useState("");
 
   const [offerers, setOfferers] = useState({});
 
@@ -76,30 +76,30 @@ function App() {
   //   rtcPeerConnRef.current.addIceCandidate(new RTCIceCandidate(candidate));
   // }
 
-  const createRoom = async () => {
-    try {
+  // const createRoom = async () => {
+  //   try {
 
-      roomIdRef.current = new Date().getTime().toString()
+  //     roomIdRef.current = new Date().getTime().toString()
 
-      const offererSDPData = await rtcPeerConnRef.current.createOffer({
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
-      });
+  //     const offererSDPData = await rtcPeerConnRef.current.createOffer({
+  //       offerToReceiveAudio: true,
+  //       offerToReceiveVideo: true
+  //     });
 
-      console.log("offerers local sdp set...");
-      rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(offererSDPData));
+  //     console.log("offerers local sdp set...");
+  //     rtcPeerConnRef.current.setLocalDescription(new RTCSessionDescription(offererSDPData));
 
-      socket.emit("createRoom", {
-        roomId: roomIdRef.current,
-        offererSDPData
-      });
+  //     socket.emit("createRoom", {
+  //       roomId: roomIdRef.current,
+  //       offererSDPData
+  //     });
 
-      setIsRoomCreated(true);
+  //     setIsRoomCreated(true);
 
-    } catch (err) {
-      console.log("Error: ", err);
-    }
-  }
+  //   } catch (err) {
+  //     console.log("Error: ", err);
+  //   }
+  // }
 
   const joinRoom = (roomId: string) => {
     try {
