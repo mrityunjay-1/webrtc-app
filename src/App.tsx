@@ -22,7 +22,7 @@ function App() {
   // const [isRoomCreated, setIsRoomCreated] = useState(false);
   // const [room, setRoom] = useState("");
 
-  const [offerers, setOfferers] = useState({});
+  const [offerers, setOfferers] = useState([]);
 
   // const createOffer = () => {
 
@@ -166,6 +166,7 @@ function App() {
 
     socket.on("greeting", ({ message }) => {
       console.log("message from server : ", message);
+      socket.emit("getAllAvailableOfferersList");
     });
 
     socket.on("liveOfferersList", (offerersList) => {
@@ -263,10 +264,10 @@ function App() {
 
 
       {
-        Object.keys(offerers).map((roomId) => {
+        offerers.map((offerer: any) => {
           return (
             <>
-              <button onClick={() => joinRoom(roomId)}>{roomId}</button>
+              <button onClick={() => joinRoom(offerer?.roomId)}>{offerer?.roomId}</button>
             </>
           );
         })
