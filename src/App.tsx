@@ -224,10 +224,10 @@ function App() {
   return (
     <>
 
-      {/* <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video1Ref} autoPlay></video>
+      {/* <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video1Ref} autoPlay></video> */}
       <audio ref={audio1Ref} autoPlay></audio>
 
-      <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video2Ref} autoPlay></video> */}
+      {/* <video style={{ width: "30rem", height: "30rem", border: "0.1rem solid grey" }} ref={video2Ref} autoPlay></video> */}
       {/* <audio ref={audio2Ref} autoPlay></audio> */}
 
       <br />
