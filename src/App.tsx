@@ -120,62 +120,79 @@ function App() {
   const leaveRoom = (roomId: string) => {
     try {
 
-      rtcPeerConnRef.current.close();
+      // rtcPeerConnRef.current.removeTrack();
 
       if (roomId) socket.emit("leaveRoomFromAnswererSide", { roomId });
 
-      location.reload();
+      roomIdRef.current = "";
+
+      setCurrentlyHandlingSocketId("");
+
+      rtcPeerConnRef.current.close();
+      // rtcPeerConnRef.current = new RTCPeerConnection();
+
+      // location.reload();
 
     } catch (err) {
       console.log("Error while leaving room: ", err);
     }
   }
 
-  useEffect(() => {
+  const initiateCall = () => {
+    try {
 
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      .then((stream) => {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then((stream) => {
 
-        // video1Ref.current.srcObject = stream;
+          // video1Ref.current.srcObject = stream;
 
-        stream.getTracks().forEach((track) => {
-          rtcPeerConnRef.current.addTrack(track, stream);
+          stream.getTracks().forEach((track) => {
+            rtcPeerConnRef.current.addTrack(track, stream);
+          });
+
+        })
+        .catch((err) => {
+          console.log("Error ocurred while acquiring media devices : ", err);
         });
 
-      })
-      .catch((err) => {
-        console.log("Error ocurred while acquiring media devices : ", err);
-      });
+      const rtcPeerConn = new RTCPeerConnection();
 
-    const rtcPeerConn = new RTCPeerConnection();
-
-    rtcPeerConn.onicecandidate = (data) => {
-      if (data.candidate) {
-        console.log("Candidate >>>");
-        console.log(JSON.stringify(data.candidate));
-        if (roomIdRef.current)
-          socket.emit("offererIceCandidates", { roomId: roomIdRef.current, candidate: data.candidate });
-      }
-    }
-
-    rtcPeerConn.oniceconnectionstatechange = (data: any) => {
-      console.log("on ice connections state change event listener called : ", data);
-
-      if (data?.target?.iceConnectionState === "disconnected") {
-        console.log("peer disconnected...");
-        leaveRoom("");
+      rtcPeerConn.onicecandidate = (data) => {
+        if (data.candidate) {
+          console.log("Candidate >>>");
+          console.log(JSON.stringify(data.candidate));
+          if (roomIdRef.current)
+            socket.emit("offererIceCandidates", { roomId: roomIdRef.current, candidate: data.candidate });
+        }
       }
 
-    }
+      rtcPeerConn.oniceconnectionstatechange = (data: any) => {
+        console.log("on ice connections state change event listener called : ", data);
 
-    rtcPeerConn.ontrack = (data) => {
-      console.log("ontrack event listener called : ", data);
-      // video2Ref.current.srcObject = data.streams[0];
-      audio1Ref.current.srcObject = data.streams[0];
-      // audio1Ref.current.play();
-    }
+        if (data?.target?.iceConnectionState === "disconnected") {
+          console.log("peer disconnected...");
+          leaveRoom("");
+        }
 
-    rtcPeerConnRef.current = rtcPeerConn;
+      }
+
+      rtcPeerConn.ontrack = (data) => {
+        console.log("ontrack event listener called : ", data);
+        // video2Ref.current.srcObject = data.streams[0];
+        audio1Ref.current.srcObject = data.streams[0];
+        // audio1Ref.current.play();
+      }
+
+      rtcPeerConnRef.current = rtcPeerConn;
+
+    } catch (err) {
+      console.log("Error in initiate call function : ", err);
+    }
+  }
+
+  useEffect(() => {
+
+
 
   }, []);
 
@@ -315,7 +332,10 @@ function App() {
                         <button
                           className='join-cut-call-button'
                           style={{ background: "green" }}
-                          onClick={() => joinRoom(offerer?.roomId, offerer?.userSocketId)}>
+                          onClick={() => {
+                            initiateCall();
+                            joinRoom(offerer?.roomId, offerer?.userSocketId)
+                          }}>
                           Join This Call
                         </button>
                         :
